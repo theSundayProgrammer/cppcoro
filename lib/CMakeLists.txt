@@ -152,6 +152,45 @@ if(WIN32)
       # TODO remove this when experimental/non-experimental include are fixed
       list(APPEND compile_definition _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING=1)
     endif()
+else()
+	# assuming linux !
+
+	option(CPPCORO_USE_IO_RING "Enable io_ring backend" OFF)
+
+	set(linuxDetailIncludes
+		linux.hpp
+		linux_io_operation.hpp
+		)
+	if (CPPCORO_USE_IO_RING)
+		find_package(liburing REQUIRED)
+		list(APPEND libraries liburing::liburing)
+
+		list(APPEND linuxDetailIncludes
+			linux_uring_queue.hpp
+			)
+		list(APPEND compile_definition
+			CPPCORO_USE_IO_RING=1
+			)
+		list(APPEND linuxSources
+			linux_uring_queue.cpp
+			io_service.cpp
+			file.cpp
+			readable_file.cpp
+			writable_file.cpp
+			read_only_file.cpp
+			write_only_file.cpp
+			read_write_file.cpp
+			file_read_operation.cpp
+			file_write_operation.cpp
+			)
+	endif()
+	list(TRANSFORM linuxDetailIncludes PREPEND "${PROJECT_SOURCE_DIR}/include/cppcoro/detail/")
+	list(APPEND detailIncludes ${linuxDetailIncludes})
+	list(APPEND linuxSources
+		linux.cpp
+		)
+	list(APPEND sources ${linuxSources})
+
 endif()
 
 add_library(cppcoro
