@@ -118,8 +118,7 @@ namespace cppcoro::detail::lnx {
 
     io_transaction &io_transaction::timeout_remove(int flags) noexcept {
         if (m_sqe) {
-            io_uring_prep_timeout_remove(m_sqe, *reinterpret_cast<uint64_t*>(&m_message), flags);
-            m_message.result = -ECANCELED;
+            io_uring_prep_timeout_remove(m_sqe, reinterpret_cast<uint64_t>(&m_message), flags);
         }
         return *this;
     }
